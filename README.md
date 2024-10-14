@@ -1,3 +1,4 @@
+[![Latest Stable Version](https://github.com/as-cornell/as_entity_list/releases/)](https://packagist.org/packages/as-cornell/as_entity_list)
 # AS ENTITY LIST (as_entity_list)
 
 ## INTRODUCTION
