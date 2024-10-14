@@ -1,0 +1,6 @@
+name: A&S Entity List
+description: "Lists of people, articles or taxonomy term with selectors for number of items, tag filter, view mode."
+package: AS
+type: module
+core_version_requirement: ^9 || ^10
+configure: as_entity_list.list

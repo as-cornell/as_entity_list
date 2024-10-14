@@ -1,0 +1,146 @@
+<?php
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\Query;
+use Drupal\Core\Database\Database;
+
+// need to figure out how to combine person and articles lookup
+// need to refine and/or in entity queries
+
+
+function as_entity_list_get_articles($type,$count,$tags)
+{
+ //use entity query to look up article nids filtered by tags
+ dump($tags);
+  $query = \Drupal::entityQuery('node', $conjunction = 'AND')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+    if(isset($tags) && $tags != NULL) {
+      $query->condition('field_article_view_tags.entity',$tags);  
+        }
+  $nids= $query->execute();
+
+  //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_articles_footer($type,$count,$nid)
+{
+ //use entity query to look up article nids to display in footer of article, excludes current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // don't include this nid
+    ->condition('nid', $nid, '<>')
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_articles_person($count,$nid)
+{
+ //use entity query to look up article nids with related people containing current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related people contains nid
+    ->condition('field_related_people.entity',$nid)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_people($type,$count,$tags)
+{
+ //use entity query to look up people nids filtered by research area
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'person')
+    ->condition('status', 1)
+    ->condition('field_research_areas.entity',$tags)
+    ->range(0, $count)
+    ->sort('field_person_last_name', 'ASC');
+  $nids = $query->execute();
+  //dump($nids);
+  return $nids;
+}
+
+
+
+function as_entity_list_get_works($type,$count,$tags)
+{
+ //use entity query to look up nids
+    $nids = \Drupal::entityQuery('node')
+      ->accessCheck(TRUE)
+      ->condition('type', $type)
+      // leave to filter by research area
+      //->condition('field_research_areas.entity',$tags)
+      ->condition('status', 1)
+      ->sort('created', 'DESC') 
+      ->range(0, $count)
+      ->execute();
+      //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_cinevents($type,$count,$tags)
+{
+ //use entity query to look up nids
+    $nids = \Drupal::entityQuery('node')
+      ->accessCheck(TRUE)
+      ->condition('type', 'cinevent')
+      // leave to filter by film series
+      //->condition('field_film_series.entity',$tags)
+      ->condition('status', 1)
+      ->sort('created', 'DESC') 
+      ->range(0, $count)
+      ->execute();
+      //dump($nids);
+  return $nids;
+}
+
+
+
+function as_entity_list_get_terms($type,$count)
+{
+    //use entity query to look up tids
+      
+    $tids = \Drupal::entityQuery('taxonomy_term')
+      ->accessCheck(TRUE)
+      ->condition('vid', $type)
+      ->condition('status', 1)
+      // exclude parent terms like department names
+      ->condition('parent', '0', '<>')
+      ->range(0, $count)
+      ->execute();
+      //dump($tids);
+  return $tids;
+}
+
+
+
+/**
+ * Implements hook_help().
+ */
+function as_entity_list($route_name, RouteMatchInterface $route_match)
+{
+  switch ($route_name) {
+    case 'help.as_entity_list':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Lists of people, articles or taxonomy term with selectors for number of items, tag filter, view mode.') . '</p>';
+
+      return $output;
+  }
+}
+
+

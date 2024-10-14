@@ -1,0 +1,5 @@
+services:
+  as_entity_list.buildEntityList:
+    class: Drupal\as_entity_list\buildEntityList
+    tags:
+      - { name: twig.extension }
