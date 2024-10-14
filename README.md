@@ -1,4 +1,5 @@
-[![Latest Stable Version](https://poser.pugx.org/as-cornell/as_entity_list/v/1.0.1)](https://packagist.org/packages/as-cornell/as_entity_list)
+[![Latest Stable Version](http://poser.pugx.org/as-cornell/as_entity_list/v?style=for-the-badge)](https://packagist.org/packages/as-cornell/as_entity_list)
+
 # AS ENTITY LIST (as_entity_list)
 
 ## INTRODUCTION
