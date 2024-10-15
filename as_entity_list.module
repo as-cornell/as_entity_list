@@ -131,7 +131,7 @@ function as_entity_list_get_terms($type,$count)
 /**
  * Implements hook_help().
  */
-function as_entity_list($route_name, RouteMatchInterface $route_match)
+function as_entity_list_help($route_name, RouteMatchInterface $route_match)
 {
   switch ($route_name) {
     case 'help.as_entity_list':
