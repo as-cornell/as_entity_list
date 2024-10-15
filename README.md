@@ -13,12 +13,20 @@ Current maintainers for Drupal 10:
 - Mark Wilson (markewilson)
 
 ## FUNCTIONS
-- as_entity_list_get_articles //use entity query to look up article nids filtered by tags
-- as_entity_list_get_articles_footer //use entity query to look up article nids to display in footer of article, excludes current nid
-- as_entity_list_get_articles_person //use entity query to look up article nids with related people containing current nid
-- as_entity_list_get_people //use entity query to look up people nids filtered by research area
-- as_entity_list_get_works //use entity query to look up nids of work content type
-- as_entity_list_get_cinevents //use entity query to look up nids of cinevent content type 
-- as_entity_list_get_terms //use entity query to look up tids from a passed vocabulary
-
-- build_entity_list($type,$count,$tags,$nid) //buildEntityList extends Drupal's Twig_Extension class
+- as_entity_list_get_articles 
+  //use entity query to look up article nids filtered by tags
+- as_entity_list_get_articles_footer 
+  //use entity query to look up article nids to display in footer of article, excludes current nid
+- as_entity_list_get_articles_person 
+  //use entity query to look up article nids with related people containing current nid
+- as_entity_list_get_people 
+  //use entity query to look up people nids filtered by research area
+- as_entity_list_get_works 
+  //use entity query to look up nids of work content type
+- as_entity_list_get_cinevents 
+  //use entity query to look up nids of cinevent content type 
+- as_entity_list_get_terms 
+  //use entity query to look up tids from a passed vocabulary
+- as_entity_list_help
+- build_entity_list($type,$count,$tags,$nid) 
+  //buildEntityList extends Drupal's Twig_Extension class
