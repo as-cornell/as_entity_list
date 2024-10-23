@@ -184,6 +184,7 @@ function as_entity_list_get_people_department($count,$tags)
           }
         }
     }
+}
 
 function as_entity_list_get_people_research($count,$tags)
 {
