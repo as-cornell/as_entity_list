@@ -8,7 +8,7 @@ use Drupal\Core\Database\Database;
 // need to refine and/or in entity queries
 
 
-function as_entity_list_get_articles($type,$count,$tags)
+function as_entity_list_get_articles($count,$tags)
 {
  //use entity query to look up article nids filtered by tags
  dump($tags);
@@ -27,7 +27,56 @@ function as_entity_list_get_articles($type,$count,$tags)
   return $nids;
 }
 
-function as_entity_list_get_articles_footer($type,$count,$nid)
+function as_entity_list_get_articles_as($count,$tags)
+{
+ //use entity query to look up a specific number article nids filtered by article tags
+
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1);
+    if(isset($tags) && $tags != NULL) {
+      $operator = $tags[0]['operator'];
+      $sort = $tags[0]['sort'];
+      if($sort == 'latest'){
+        $query->sort('created', 'DESC');
+        $query->range(0, $count);
+      }
+      if($sort == 'oldest'){
+        $query->sort('created', 'ASC');
+        $query->range(0, $count);
+      }
+      if($sort == 'random'){
+        // get more for random, to make sure it's really random
+        $query->range(0, 500);
+      }
+      $tags = explode(',', $tags[0]['tids']);
+        foreach ($tags as $tid) {
+          if($operator == 'and'){
+          $query->condition($query->andConditionGroup()
+            ->condition('field_tags', $tid));
+          }
+          if($operator == 'or'){
+          $query->condition($query->orConditionGroup()
+            ->condition('field_tags', $tid));
+          }
+        }
+    }
+
+  $nids = $query->execute();
+
+  if($sort == 'random'){
+    // randomize array
+    $random = shuffle($nids);
+    // chop back down to requested list size
+    $nids = array_slice($nids, 0, $count);
+    //dump($nids);
+    }
+  
+  return $nids;
+}
+
+function as_entity_list_get_articles_footer($count,$nid)
 {
  //use entity query to look up article nids to display in footer of article, excludes current nid
   $query = \Drupal::entityQuery('node')
@@ -59,7 +108,84 @@ function as_entity_list_get_articles_person($count,$nid)
   return $nids;
 }
 
-function as_entity_list_get_people($type,$count,$tags)
+function as_entity_list_get_articles_person_as($count,$nid)
+{
+ //use entity query to look up article nids with related people containing current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related people node contains nid
+    ->condition('field_related_people_nodes.entity',$nid)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  //dump($nids);
+  return $nids;
+}
+function as_entity_list_get_articles_department($count,$tags)
+{
+ //use entity query to look up article nids with related people containing current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related departments contains tid
+    ->condition('field_department_program.entity',$tags)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_people($count,$tags)
+{
+ //use entity query to look up people nids filtered by research area
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'person')
+    ->condition('status', 1)
+    ->condition('field_research_areas.entity',$tags)
+    ->range(0, $count)
+    ->sort('field_person_last_name', 'ASC');
+  $nids = $query->execute();
+  //dump($nids);
+  return $nids;
+}
+
+function as_entity_list_get_people_department($count,$tags)
+{
+ //use entity query to look up people nids filtered by department/program
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'person')
+    ->condition('status', 1);
+    if(isset($tags) && $tags != NULL) {
+      $operator = $tags[0]['operator'];
+      $sort = $tags[0]['sort'];
+      if($sort == 'alphabetical'){
+        $query->sort('field_person_last_name', 'ASC');;
+        $query->range(0, $count);
+      }
+      if($sort == 'random'){
+        // get more for random, to make sure it's really random
+        $query->range(0, 500);
+      }
+      $tags = explode(',', $tags[0]['tids']);
+        foreach ($tags as $tid) {
+          if($operator == 'and'){
+          $query->condition($query->andConditionGroup()
+            ->condition('field_departments_programs', $tid));
+          }
+          if($operator == 'or'){
+          $query->condition($query->orConditionGroup()
+            ->condition('field_departments_programs', $tid));
+          }
+        }
+    }
+
+function as_entity_list_get_people_research($count,$tags)
 {
  //use entity query to look up people nids filtered by research area
   $query = \Drupal::entityQuery('node')
@@ -76,12 +202,12 @@ function as_entity_list_get_people($type,$count,$tags)
 
 
 
-function as_entity_list_get_works($type,$count,$tags)
+function as_entity_list_get_works($count,$tags)
 {
  //use entity query to look up nids
     $nids = \Drupal::entityQuery('node')
       ->accessCheck(TRUE)
-      ->condition('type', $type)
+      ->condition('type', 'work')
       // leave to filter by research area
       //->condition('field_research_areas.entity',$tags)
       ->condition('status', 1)
@@ -92,7 +218,7 @@ function as_entity_list_get_works($type,$count,$tags)
   return $nids;
 }
 
-function as_entity_list_get_cinevents($type,$count,$tags)
+function as_entity_list_get_cinevents($count,$tags)
 {
  //use entity query to look up nids
     $nids = \Drupal::entityQuery('node')
