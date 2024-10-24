@@ -62,10 +62,10 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
         $entity_list = as_entity_list_get_articles_person($count,$nid);
       }
     if ($type == 'article_person_as'){
-        $entity_list = as_entity_list_get_articles_person($count,$nid);
+        $entity_list = as_entity_list_get_articles_person_as($count,$nid);
       }
     if ($type == 'article_department'){
-        $entity_list = as_entity_list_get_articles_department($count,$nid);
+        $entity_list = as_entity_list_get_articles_department($count,$tags);
       }
     // people nids filtered by tags, type is used to filter results by vocabulary
     if ($type == 'person'){

@@ -30,14 +30,14 @@ function as_entity_list_get_articles($count,$tags)
 function as_entity_list_get_articles_as($count,$tags)
 {
  //use entity query to look up a specific number article nids filtered by article tags
-
-  $query = \Drupal::entityQuery('node')
-    ->accessCheck(TRUE)
-    ->condition('type', 'article')
-    ->condition('status', 1);
-    if(isset($tags) && $tags != NULL) {
-      $operator = $tags[0]['operator'];
-      $sort = $tags[0]['sort'];
+  if(isset($tags) && $tags != NULL) {
+    $tids = explode(',', $tags[0]['tids']);
+    $operator = $tags[0]['operator'];
+    $sort = $tags[0]['sort'];
+    $query = \Drupal::entityQuery('node')
+      ->accessCheck(TRUE)
+      ->condition('type', 'article')
+      ->condition('status', 1);
       if($sort == 'latest'){
         $query->sort('created', 'DESC');
         $query->range(0, $count);
@@ -50,28 +50,27 @@ function as_entity_list_get_articles_as($count,$tags)
         // get more for random, to make sure it's really random
         $query->range(0, 500);
       }
-      $tags = explode(',', $tags[0]['tids']);
-        foreach ($tags as $tid) {
-          if($operator == 'and'){
+        
+      foreach ($tids as $tid) {
+        if($operator == 'and'){
           $query->condition($query->andConditionGroup()
-            ->condition('field_tags', $tid));
-          }
-          if($operator == 'or'){
-          $query->condition($query->orConditionGroup()
-            ->condition('field_tags', $tid));
-          }
+          ->condition('field_tags.entity', $tid));
         }
-    }
-
-  $nids = $query->execute();
+        if($operator == 'or'){
+          $query->condition($query->orConditionGroup()
+          ->condition('field_tags.entity', $tid));
+        }
+      }
+    
+    $nids = $query->execute();
+  }
 
   if($sort == 'random'){
     // randomize array
     $random = shuffle($nids);
     // chop back down to requested list size
     $nids = array_slice($nids, 0, $count);
-    //dump($nids);
-    }
+  }
   
   return $nids;
 }
@@ -157,33 +156,47 @@ function as_entity_list_get_people($count,$tags)
 function as_entity_list_get_people_department($count,$tags)
 {
  //use entity query to look up people nids filtered by department/program
+  if(isset($tags) && $tags != NULL) {
+  $tids = explode(',', $tags[0]['tids']);
+  $operator = $tags[0]['operator'];
+  $sort = $tags[0]['sort'];
+
   $query = \Drupal::entityQuery('node')
     ->accessCheck(TRUE)
     ->condition('type', 'person')
     ->condition('status', 1);
-    if(isset($tags) && $tags != NULL) {
-      $operator = $tags[0]['operator'];
-      $sort = $tags[0]['sort'];
-      if($sort == 'alphabetical'){
-        $query->sort('field_person_last_name', 'ASC');;
-        $query->range(0, $count);
-      }
-      if($sort == 'random'){
-        // get more for random, to make sure it's really random
-        $query->range(0, 500);
-      }
-      $tags = explode(',', $tags[0]['tids']);
-        foreach ($tags as $tid) {
-          if($operator == 'and'){
-          $query->condition($query->andConditionGroup()
-            ->condition('field_departments_programs', $tid));
-          }
-          if($operator == 'or'){
-          $query->condition($query->orConditionGroup()
-            ->condition('field_departments_programs', $tid));
-          }
-        }
+    if($sort == 'alphabetical'){
+      $query->sort('field_person_last_name', 'ASC');
+      $query->range(0, $count);
     }
+    if($sort == 'random'){
+      // get more for random, to make sure it's really random
+      $query->range(0, 500);
+    }
+     
+    foreach ($tids as $tid) {
+      if($operator == 'and'){
+          $query->condition($query->andConditionGroup()
+          ->condition('field_departments_programs.entity', $tid));
+      }
+      if($operator == 'or'){
+          $query->condition($query->orConditionGroup()
+          ->condition('field_departments_programs.entity', $tid));
+      }
+    }
+
+    $nids = $query->execute();
+  }
+
+  if($sort == 'random'){
+    // randomize array
+    $random = shuffle($nids);
+    // chop back down to requested list size
+    $nids = array_slice($nids, 0, $count);
+  }
+  
+  return $nids;
+      
 }
 
 function as_entity_list_get_people_research($count,$tags)
