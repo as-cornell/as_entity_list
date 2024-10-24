@@ -11,7 +11,6 @@ use Drupal\Core\Database\Database;
 function as_entity_list_get_articles($count,$tags)
 {
  //use entity query to look up article nids filtered by tags
- dump($tags);
   $query = \Drupal::entityQuery('node', $conjunction = 'AND')
     ->accessCheck(TRUE)
     ->condition('type', 'article')
@@ -23,7 +22,6 @@ function as_entity_list_get_articles($count,$tags)
         }
   $nids= $query->execute();
 
-  //dump($nids);
   return $nids;
 }
 
@@ -87,7 +85,6 @@ function as_entity_list_get_articles_footer($count,$nid)
     ->sort('created', 'DESC') 
     ->range(0, $count);
   $nids= $query->execute();
-  //dump($nids);
   return $nids;
 }
 
@@ -103,7 +100,6 @@ function as_entity_list_get_articles_person($count,$nid)
     ->sort('created', 'DESC') 
     ->range(0, $count);
   $nids= $query->execute();
-  //dump($nids);
   return $nids;
 }
 
@@ -119,7 +115,6 @@ function as_entity_list_get_articles_person_as($count,$nid)
     ->sort('created', 'DESC') 
     ->range(0, $count);
   $nids= $query->execute();
-  //dump($nids);
   return $nids;
 }
 function as_entity_list_get_articles_department($count,$tags)
@@ -134,7 +129,6 @@ function as_entity_list_get_articles_department($count,$tags)
     ->sort('created', 'DESC') 
     ->range(0, $count);
   $nids= $query->execute();
-  //dump($nids);
   return $nids;
 }
 
@@ -149,7 +143,6 @@ function as_entity_list_get_people($count,$tags)
     ->range(0, $count)
     ->sort('field_person_last_name', 'ASC');
   $nids = $query->execute();
-  //dump($nids);
   return $nids;
 }
 
@@ -210,7 +203,6 @@ function as_entity_list_get_people_research($count,$tags)
     ->range(0, $count)
     ->sort('field_person_last_name', 'ASC');
   $nids = $query->execute();
-  //dump($nids);
   return $nids;
 }
 
@@ -228,7 +220,6 @@ function as_entity_list_get_works($count,$tags)
       ->sort('created', 'DESC') 
       ->range(0, $count)
       ->execute();
-      //dump($nids);
   return $nids;
 }
 
@@ -244,7 +235,6 @@ function as_entity_list_get_cinevents($count,$tags)
       ->sort('created', 'DESC') 
       ->range(0, $count)
       ->execute();
-      //dump($nids);
   return $nids;
 }
 
@@ -262,7 +252,6 @@ function as_entity_list_get_terms($type,$count)
       ->condition('parent', '0', '<>')
       ->range(0, $count)
       ->execute();
-      //dump($tids);
   return $tids;
 }
 
