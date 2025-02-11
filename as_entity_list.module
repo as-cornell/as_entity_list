@@ -117,15 +117,61 @@ function as_entity_list_get_articles_person_as($count,$nid)
   $nids= $query->execute();
   return $nids;
 }
+
 function as_entity_list_get_articles_department($count,$tags)
 {
- //use entity query to look up article nids with related people containing current nid
+ //use entity query to look up article nids with related departments tid
   $query = \Drupal::entityQuery('node')
     ->accessCheck(TRUE)
     ->condition('type', 'article')
     ->condition('status', 1)
     // only if related departments contains tid
     ->condition('field_department_program.entity',$tags)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_byline($count,$tags)
+{
+ //use entity query to look up article nids with related byline tid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related departments contains tid
+    ->condition('field_byline_reference.entity',$tags)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_mediasource($count,$tags)
+{
+ //use entity query to look up article nids with related byline tid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related departments contains tid
+    ->condition('field_media_source_reference.entity',$tags)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_related_functions($count,$tags)
+{
+ //use entity query to look up article nids with related byline tid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related departments contains tid
+    ->condition('field_related_functions.entity',$tags)
     ->sort('created', 'DESC') 
     ->range(0, $count);
   $nids= $query->execute();
