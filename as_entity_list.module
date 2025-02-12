@@ -30,6 +30,7 @@ function as_entity_list_get_articles_as($count,$tags)
  //use entity query to look up a specific number article nids filtered by article tags
   if(isset($tags) && $tags != NULL) {
     $tids = explode(',', $tags[0]['tids']);
+    $vid = $tags[0]['vid'];
     $operator = $tags[0]['operator'];
     $sort = $tags[0]['sort'];
     $query = \Drupal::entityQuery('node')
@@ -50,13 +51,45 @@ function as_entity_list_get_articles_as($count,$tags)
       }
         
       foreach ($tids as $tid) {
-        if($operator == 'and'){
-          $query->condition($query->andConditionGroup()
-          ->condition('field_tags.entity', $tid));
+        if($vid == 'tags'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_tags.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_tags.entity', $tid));
+          }
         }
-        if($operator == 'or'){
-          $query->condition($query->orConditionGroup()
-          ->condition('field_tags.entity', $tid));
+        if($vid == 'function'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_related_functions.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_related_functions.entity', $tid));
+          }
+        }
+        if($vid == 'article_bylines'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_byline_reference.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_byline_reference.entity', $tid));
+          }
+        }
+        if($vid == 'article_mediasources'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_media_source_reference.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_media_source_reference.entity', $tid));
+          }
         }
       }
     
