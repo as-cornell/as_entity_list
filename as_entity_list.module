@@ -61,6 +61,16 @@ function as_entity_list_get_articles_as($count,$tags)
             ->condition('field_tags.entity', $tid));
           }
         }
+        if($vid == 'departments_programs'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_department_program.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_department_program.entity', $tid));
+          }
+        }
         if($vid == 'function'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
