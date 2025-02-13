@@ -27,7 +27,7 @@ function as_entity_list_get_articles($count,$tags)
 
 function as_entity_list_get_articles_as($count,$tags)
 {
- //use entity query to look up a specific number article nids filtered by article tags
+ //use entity query to look up a specific number article nids filtered by term references
   if(isset($tags) && $tags != NULL) {
     $tids = explode(',', $tags[0]['tids']);
     $vid = $tags[0]['vid'];
@@ -114,6 +114,94 @@ function as_entity_list_get_articles_as($count,$tags)
   }
   
   return $nids;
+}
+
+function as_entity_list_get_terms_as($type,$count,$tags)
+{
+ //use entity query to look up a specific number taxonomy term tids filtered by term references
+  if ($type == 'dpc_as'){
+    $vname = 'departments_programs';
+  }
+  if ($type == 'mmg_as'){
+    $vname = 'majors_minors_gradfields';
+  }
+  if(isset($tags) && $tags != NULL) {
+    $tids = explode(',', $tags[0]['tids']);
+    $vid = $tags[0]['vid'];
+    $operator = 'and';
+    //$sort = $tags[0]['sort'];
+    $query = \Drupal::entityQuery('taxonomy_term')
+      ->accessCheck(TRUE)
+      ->condition('vid', $vname)
+      ->condition('status', 1)
+      ->range(0, $count)
+      ->sort('name', 'ASC');
+      //->execute();
+
+      foreach ($tids as $tid) {
+        if($vid == 'department_type'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_type.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_type.entity', $tid));
+          }
+        }
+        if($vid == 'discipline'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_discipline.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_discipline.entity', $tid));
+          }
+        }
+        if($vid == 'function'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_related_functions.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_related_functions.entity', $tid));
+          }
+        } 
+        if($vid == 'interests'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_interests.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_interests.entity', $tid));
+          }
+        }
+        if($vid == 'level'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_level.entity', $tid));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_level.entity', $tid));
+          }
+        }
+      }
+    
+    $terms = $query->execute();
+  }
+
+  //if($sort == 'random'){
+    // randomize array
+    //$random = shuffle($nids);
+    // chop back down to requested list size
+    //$nids = array_slice($nids, 0, $count);
+  //}
+  
+  return $terms;
 }
 
 function as_entity_list_get_articles_footer($count,$nid)

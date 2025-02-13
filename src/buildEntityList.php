@@ -77,6 +77,12 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
     if ($type == 'person_research'){
         $entity_list = as_entity_list_get_people_research($count,$tags);
       }
+    if ($type == 'dpc_as'){
+        $entity_list = as_entity_list_get_terms_as($type,$count,$tags);
+      }
+    if ($type == 'mmg_as'){
+        $entity_list = as_entity_list_get_terms_as($type,$count,$tags);
+      }
     if ($type == 'work'){
         $entity_list = as_entity_list_get_works($count,$tags);
       }
