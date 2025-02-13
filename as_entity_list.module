@@ -128,15 +128,20 @@ function as_entity_list_get_terms_as($type,$count,$tags)
   if(isset($tags) && $tags != NULL) {
     $tids = explode(',', $tags[0]['tids']);
     $vid = $tags[0]['vid'];
-    $operator = 'and';
-    //$sort = $tags[0]['sort'];
+    $operator = $tags[0]['operator'];
+    $sort = $tags[0]['sort'];
     $query = \Drupal::entityQuery('taxonomy_term')
       ->accessCheck(TRUE)
       ->condition('vid', $vname)
-      ->condition('status', 1)
-      ->range(0, $count)
-      ->sort('name', 'ASC');
-      //->execute();
+      ->condition('status', 1);
+      if($sort == 'alphabetical'){
+        $query->sort('name', 'ASC');
+        $query->range(0, $count);
+      }
+      if($sort == 'random'){
+        // get more for random, to make sure it's really random
+        $query->range(0, 500);
+      }
 
       foreach ($tids as $tid) {
         if($vid == 'department_type'){
@@ -194,12 +199,12 @@ function as_entity_list_get_terms_as($type,$count,$tags)
     $terms = $query->execute();
   }
 
-  //if($sort == 'random'){
+  if($sort == 'random'){
     // randomize array
-    //$random = shuffle($nids);
+    $random = shuffle($terms);
     // chop back down to requested list size
-    //$nids = array_slice($nids, 0, $count);
-  //}
+    $terms = array_slice($terms, 0, $count);
+  }
   
   return $terms;
 }
