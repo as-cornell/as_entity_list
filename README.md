@@ -15,6 +15,10 @@ Current maintainers for Drupal 10:
 ## FUNCTIONS
 - as_entity_list_get_articles 
   //use entity query to look up article nids filtered by tags
+- as_entity_list_get_articles_as
+  //use entity query to look up article nids filtered by tags, sort, count, operator
+- as_entity_list_get_terms_as
+  //use entity query to look up taxonomy_erm tids filtered by tags, sort, count, operator
 - as_entity_list_get_articles_footer 
   //use entity query to look up article nids to display in footer of article, excludes current nid
 - as_entity_list_get_articles_person 
