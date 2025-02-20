@@ -25,6 +25,99 @@ function as_entity_list_get_articles($count,$tags)
   return $nids;
 }
 
+function as_entity_list_get_articles_as($count,$tags)
+{
+ //use entity query to look up a specific number article nids filtered by term references
+  if(isset($tags) && $tags != NULL) {
+    //$tids = explode(',', $tags[0]['tids']);
+    //$vid = $tags[0]['vid'];
+    $termvariables = $tags[0]['termvariables'];
+    $operator = $tags[0]['operator'];
+    $sort = $tags[0]['sort'];
+    $query = \Drupal::entityQuery('node')
+      ->accessCheck(TRUE)
+      ->condition('type', 'article')
+      ->condition('status', 1);
+      if($sort == 'latest'){
+        $query->sort('created', 'DESC');
+        $query->range(0, $count);
+      }
+      if($sort == 'oldest'){
+        $query->sort('created', 'ASC');
+        $query->range(0, $count);
+      }
+      if($sort == 'random'){
+        // get more for random, to make sure it's really random
+        $query->range(0, 500);
+      }
+        
+      //foreach ($tids as $tid) {
+      foreach ($termvariables as $term) {
+        if($term['vid'] == 'tags'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_tags.entity', $term['tid']));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_tags.entity', $term['tid']));
+          }
+        }
+        if($term['vid'] == 'departments_programs'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_department_program.entity', $term['tid']));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_department_program.entity', $term['tid']));
+          }
+        }
+        if($term['vid'] == 'function'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_related_functions.entity', $term['tid']));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_related_functions.entity', $term['tid']));
+          }
+        }
+        if($term['vid'] == 'article_bylines'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_byline_reference.entity', $term['tid']));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_byline_reference.entity', $term['tid']));
+          }
+        }
+        if($term['vid']== 'article_mediasources'){
+          if($operator == 'and'){
+            $query->condition($query->andConditionGroup()
+            ->condition('field_media_source_reference.entity', $term['tid']));
+          }
+          if($operator == 'or'){
+            $query->condition($query->orConditionGroup()
+            ->condition('field_media_source_reference.entity', $term['tid']));
+          }
+        }
+      }
+    
+    $nids = $query->execute();
+  }
+
+  if($sort == 'random'){
+    // randomize array
+    $random = shuffle($nids);
+    // chop back down to requested list size
+    $nids = array_slice($nids, 0, $count);
+  }
+  
+  return $nids;
+}
+
 function as_entity_list_get_terms_as($type,$count,$tags)
 {
  //use entity query to look up a specific number taxonomy term tids filtered by term references
