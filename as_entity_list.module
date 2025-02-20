@@ -25,97 +25,6 @@ function as_entity_list_get_articles($count,$tags)
   return $nids;
 }
 
-function as_entity_list_get_articles_as($count,$tags)
-{
- //use entity query to look up a specific number article nids filtered by term references
-  if(isset($tags) && $tags != NULL) {
-    $tids = explode(',', $tags[0]['tids']);
-    $vid = $tags[0]['vid'];
-    $operator = $tags[0]['operator'];
-    $sort = $tags[0]['sort'];
-    $query = \Drupal::entityQuery('node')
-      ->accessCheck(TRUE)
-      ->condition('type', 'article')
-      ->condition('status', 1);
-      if($sort == 'latest'){
-        $query->sort('created', 'DESC');
-        $query->range(0, $count);
-      }
-      if($sort == 'oldest'){
-        $query->sort('created', 'ASC');
-        $query->range(0, $count);
-      }
-      if($sort == 'random'){
-        // get more for random, to make sure it's really random
-        $query->range(0, 500);
-      }
-        
-      foreach ($tids as $tid) {
-        if($vid == 'tags'){
-          if($operator == 'and'){
-            $query->condition($query->andConditionGroup()
-            ->condition('field_tags.entity', $tid));
-          }
-          if($operator == 'or'){
-            $query->condition($query->orConditionGroup()
-            ->condition('field_tags.entity', $tid));
-          }
-        }
-        if($vid == 'departments_programs'){
-          if($operator == 'and'){
-            $query->condition($query->andConditionGroup()
-            ->condition('field_department_program.entity', $tid));
-          }
-          if($operator == 'or'){
-            $query->condition($query->orConditionGroup()
-            ->condition('field_department_program.entity', $tid));
-          }
-        }
-        if($vid == 'function'){
-          if($operator == 'and'){
-            $query->condition($query->andConditionGroup()
-            ->condition('field_related_functions.entity', $tid));
-          }
-          if($operator == 'or'){
-            $query->condition($query->orConditionGroup()
-            ->condition('field_related_functions.entity', $tid));
-          }
-        }
-        if($vid == 'article_bylines'){
-          if($operator == 'and'){
-            $query->condition($query->andConditionGroup()
-            ->condition('field_byline_reference.entity', $tid));
-          }
-          if($operator == 'or'){
-            $query->condition($query->orConditionGroup()
-            ->condition('field_byline_reference.entity', $tid));
-          }
-        }
-        if($vid == 'article_mediasources'){
-          if($operator == 'and'){
-            $query->condition($query->andConditionGroup()
-            ->condition('field_media_source_reference.entity', $tid));
-          }
-          if($operator == 'or'){
-            $query->condition($query->orConditionGroup()
-            ->condition('field_media_source_reference.entity', $tid));
-          }
-        }
-      }
-    
-    $nids = $query->execute();
-  }
-
-  if($sort == 'random'){
-    // randomize array
-    $random = shuffle($nids);
-    // chop back down to requested list size
-    $nids = array_slice($nids, 0, $count);
-  }
-  
-  return $nids;
-}
-
 function as_entity_list_get_terms_as($type,$count,$tags)
 {
  //use entity query to look up a specific number taxonomy term tids filtered by term references
@@ -126,8 +35,9 @@ function as_entity_list_get_terms_as($type,$count,$tags)
     $vname = 'majors_minors_gradfields';
   }
   if(isset($tags) && $tags != NULL) {
-    $tids = explode(',', $tags[0]['tids']);
-    $vid = $tags[0]['vid'];
+    //$tids = explode(',', $tags[0]['tids']);
+    //$vid = $tags[0]['vid'];
+    $termvariables = $tags[0]['termvariables'];
     $operator = $tags[0]['operator'];
     $sort = $tags[0]['sort'];
     $query = \Drupal::entityQuery('taxonomy_term')
@@ -143,55 +53,56 @@ function as_entity_list_get_terms_as($type,$count,$tags)
         $query->range(0, 500);
       }
 
-      foreach ($tids as $tid) {
-        if($vid == 'department_type'){
+      //foreach ($tids as $tid) {
+      foreach ($termvariables as $term) {
+        if($term['vid'] == 'department_type'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
-            ->condition('field_type.entity', $tid));
+            ->condition('field_type.entity', $term['tid']));
           }
           if($operator == 'or'){
             $query->condition($query->orConditionGroup()
-            ->condition('field_type.entity', $tid));
+            ->condition('field_type.entity', $term['tid']));
           }
         }
-        if($vid == 'discipline'){
+        if($term['vid'] == 'discipline'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
-            ->condition('field_discipline.entity', $tid));
+            ->condition('field_discipline.entity', $term['tid']));
           }
           if($operator == 'or'){
             $query->condition($query->orConditionGroup()
-            ->condition('field_discipline.entity', $tid));
+            ->condition('field_discipline.entity', $term['tid']));
           }
         }
-        if($vid == 'function'){
+        if($term['vid'] == 'function'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
-            ->condition('field_related_functions.entity', $tid));
+            ->condition('field_related_functions.entity', $term['tid']));
           }
           if($operator == 'or'){
             $query->condition($query->orConditionGroup()
-            ->condition('field_related_functions.entity', $tid));
+            ->condition('field_related_functions.entity', $term['tid']));
           }
         } 
-        if($vid == 'interests'){
+        if($term['vid'] == 'interests'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
-            ->condition('field_interests.entity', $tid));
+            ->condition('field_interests.entity', $term['tid']));
           }
           if($operator == 'or'){
             $query->condition($query->orConditionGroup()
-            ->condition('field_interests.entity', $tid));
+            ->condition('field_interests.entity', $term['tid']));
           }
         }
-        if($vid == 'level'){
+        if($term['vid']== 'level'){
           if($operator == 'and'){
             $query->condition($query->andConditionGroup()
-            ->condition('field_level.entity', $tid));
+            ->condition('field_level.entity', $term['tid']));
           }
-          if($operator == 'or'){
+          if($term['vid'] == 'or'){
             $query->condition($query->orConditionGroup()
-            ->condition('field_level.entity', $tid));
+            ->condition('field_level.entity', $term['tid']));
           }
         }
       }
