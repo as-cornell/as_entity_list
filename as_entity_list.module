@@ -29,8 +29,6 @@ function as_entity_list_get_articles_as($count,$tags)
 {
  //use entity query to look up a specific number article nids filtered by term references
   if(isset($tags) && $tags != NULL) {
-    //$tids = explode(',', $tags[0]['tids']);
-    //$vid = $tags[0]['vid'];
     $termvariables = $tags[0]['termvariables'];
     $operator = $tags[0]['operator'];
     $sort = $tags[0]['sort'];
