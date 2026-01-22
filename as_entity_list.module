@@ -294,7 +294,7 @@ function as_entity_list_get_people_department($count,$tags)
 {
  //use entity query to look up people nids filtered by department/program
   if(isset($tags) && $tags != NULL) {
-  $tids = explode(',', $tags[0]['tids']);
+  $tids = $tags[0]['tids'];
   $operator = $tags[0]['operator'];
   $sort = $tags[0]['sort'];
 
@@ -311,14 +311,14 @@ function as_entity_list_get_people_department($count,$tags)
       $query->range(0, 500);
     }
      
-    foreach ($tids as $tid) {
+    foreach ($tids as $term) {
       if($operator == 'and'){
           $query->condition($query->andConditionGroup()
-          ->condition('field_departments_programs.entity', $tid));
+          ->condition('field_departments_programs.entity', $term['tid']));
       }
       if($operator == 'or'){
           $query->condition($query->orConditionGroup()
-          ->condition('field_departments_programs.entity', $tid));
+          ->condition('field_departments_programs.entity', $term['tid']));
       }
     }
 
