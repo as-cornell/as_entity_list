@@ -293,7 +293,6 @@ function as_entity_list_get_people($count,$tags)
     ->accessCheck(TRUE)
     ->condition('type', 'person')
     ->condition('status', 1)
-    ->condition('field_research_areas.entity',$tags)
     ->range(0, $count)
     ->sort('field_person_last_name', 'ASC');
   $nids = $query->execute();
