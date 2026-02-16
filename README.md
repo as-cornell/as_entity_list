@@ -18,7 +18,7 @@ Current maintainers for Drupal 10:
 - as_entity_list_get_articles_as
   //use entity query to look up article nids filtered by tags, sort, count, operator
 - as_entity_list_get_terms_as
-  //use entity query to look up taxonomy_erm tids filtered by tags, sort, count, operator
+  //use entity query to look up taxonomy term tids filtered by tags, sort, count, operator
 - as_entity_list_get_articles_footer 
   //use entity query to look up article nids to display in footer of article, excludes current nid
 - as_entity_list_get_articles_person 
@@ -30,7 +30,7 @@ Current maintainers for Drupal 10:
 - as_entity_list_get_cinevents 
   //use entity query to look up nids of cinevent content type 
 - as_entity_list_get_terms 
-  //use entity query to look up tids from a passed vocabulary
+  //use entity query to look up tids from a passed vocabulary id
 - as_entity_list_help
 - build_entity_list($type,$count,$tags,$nid) 
   //buildEntityList extends Drupal's Twig_Extension class
