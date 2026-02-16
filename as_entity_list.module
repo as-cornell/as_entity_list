@@ -23,7 +23,7 @@ function as_entity_list_get_articles($count,$tags)
   return $nids;
 }
 
-function as_entity_list_get_articles_as($count,$tags)
+function as_entity_list_get_articles_filtered($count,$tags)
 {
  //use entity query to look up a specific number article nids filtered by term references
   $operator = 'and';

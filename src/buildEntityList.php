@@ -45,7 +45,7 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
       }
     //article nids filtered by tags
     if ($type == 'article_as'){
-        $entity_list = as_entity_list_get_articles_as($count,$tags);
+        $entity_list = as_entity_list_get_articles_filtered($count,$tags);
       }
     // article nids to display in footer of article, excludes current nid
     if ($type == 'article_footer'){
