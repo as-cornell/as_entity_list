@@ -17,7 +17,7 @@ function as_entity_list_get_articles($count,$tags)
     ->range(0, $count);
     if(isset($tags) && $tags != NULL) {
       $query->condition('field_article_view_tags.entity',$tags);  
-        }
+    }
   $nids= $query->execute();
 
   return $nids;
@@ -128,9 +128,89 @@ function as_entity_list_get_articles_as($count,$tags)
   return $nids;
 }
 
+
+
+function as_entity_list_get_articles_footer($count,$nid)
+{
+ //use entity query to look up article nids to display in footer of article, excludes current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // don't include this nid
+    ->condition('nid', $nid, '<>')
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_person($count,$nid)
+{
+ //use entity query to look up article nids with related people containing current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related people contains nid
+    ->condition('field_related_people.entity',$nid)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_person_as($count,$nid)
+{
+ //use entity query to look up article nids with related people containing current nid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related people node contains nid
+    ->condition('field_related_people_nodes.entity',$nid)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_articles_department($count,$tags)
+{
+ //use entity query to look up article nids filtered by related departments tid
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(TRUE)
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    // only if related departments contains tid
+    ->condition('field_department_program.entity',$tags)
+    ->sort('created', 'DESC') 
+    ->range(0, $count);
+  $nids= $query->execute();
+  return $nids;
+}
+
+function as_entity_list_get_terms($type,$count)
+{
+    //use entity query to look up tids
+      
+    $tids = \Drupal::entityQuery('taxonomy_term')
+      ->accessCheck(TRUE)
+      ->condition('vid', $type)
+      ->condition('status', 1)
+      // exclude parent terms like department names
+      ->condition('parent', '0', '<>')
+      ->range(0, $count)
+      ->execute();
+  return $tids;
+}
+
+
+
+
 function as_entity_list_get_terms_as($type,$count,$tags)
 {
- //use entity query to look up a specific number taxonomy term tids filtered by term references
+ //use entity query to look up a specific number taxonomy term tids filtered by term references, only used in department_program_center_list and major_minor_gradfield_list paragraph types
   if ($type == 'dpc_as'){
     $vname = 'departments_programs';
   }
@@ -225,70 +305,11 @@ function as_entity_list_get_terms_as($type,$count,$tags)
   return $terms;
 }
 
-function as_entity_list_get_articles_footer($count,$nid)
-{
- //use entity query to look up article nids to display in footer of article, excludes current nid
-  $query = \Drupal::entityQuery('node')
-    ->accessCheck(TRUE)
-    ->condition('type', 'article')
-    ->condition('status', 1)
-    // don't include this nid
-    ->condition('nid', $nid, '<>')
-    ->sort('created', 'DESC') 
-    ->range(0, $count);
-  $nids= $query->execute();
-  return $nids;
-}
-
-function as_entity_list_get_articles_person($count,$nid)
-{
- //use entity query to look up article nids with related people containing current nid
-  $query = \Drupal::entityQuery('node')
-    ->accessCheck(TRUE)
-    ->condition('type', 'article')
-    ->condition('status', 1)
-    // only if related people contains nid
-    ->condition('field_related_people.entity',$nid)
-    ->sort('created', 'DESC') 
-    ->range(0, $count);
-  $nids= $query->execute();
-  return $nids;
-}
-
-function as_entity_list_get_articles_person_as($count,$nid)
-{
- //use entity query to look up article nids with related people containing current nid
-  $query = \Drupal::entityQuery('node')
-    ->accessCheck(TRUE)
-    ->condition('type', 'article')
-    ->condition('status', 1)
-    // only if related people node contains nid
-    ->condition('field_related_people_nodes.entity',$nid)
-    ->sort('created', 'DESC') 
-    ->range(0, $count);
-  $nids= $query->execute();
-  return $nids;
-}
-
-function as_entity_list_get_articles_department($count,$tags)
-{
- //use entity query to look up article nids with related departments tid
-  $query = \Drupal::entityQuery('node')
-    ->accessCheck(TRUE)
-    ->condition('type', 'article')
-    ->condition('status', 1)
-    // only if related departments contains tid
-    ->condition('field_department_program.entity',$tags)
-    ->sort('created', 'DESC') 
-    ->range(0, $count);
-  $nids= $query->execute();
-  return $nids;
-}
 
 
 function as_entity_list_get_people($count,$tags)
 {
- //use entity query to look up people nids filtered by research area
+ //use entity query to look up people nids
   $query = \Drupal::entityQuery('node')
     ->accessCheck(TRUE)
     ->condition('type', 'person')
@@ -366,53 +387,6 @@ function as_entity_list_get_people_research($count,$tags)
 }
 
 
-
-function as_entity_list_get_works($count,$tags)
-{
- //use entity query to look up nids
-    $nids = \Drupal::entityQuery('node')
-      ->accessCheck(TRUE)
-      ->condition('type', 'work')
-      // leave to filter by research area
-      //->condition('field_research_areas.entity',$tags)
-      ->condition('status', 1)
-      ->sort('created', 'DESC') 
-      ->range(0, $count)
-      ->execute();
-  return $nids;
-}
-
-function as_entity_list_get_cinevents($count,$tags)
-{
- //use entity query to look up nids
-    $nids = \Drupal::entityQuery('node')
-      ->accessCheck(TRUE)
-      ->condition('type', 'cinevent')
-      // leave to filter by film series
-      //->condition('field_film_series.entity',$tags)
-      ->condition('status', 1)
-      ->sort('created', 'DESC') 
-      ->range(0, $count)
-      ->execute();
-  return $nids;
-}
-
-
-
-function as_entity_list_get_terms($type,$count)
-{
-    //use entity query to look up tids
-      
-    $tids = \Drupal::entityQuery('taxonomy_term')
-      ->accessCheck(TRUE)
-      ->condition('vid', $type)
-      ->condition('status', 1)
-      // exclude parent terms like department names
-      ->condition('parent', '0', '<>')
-      ->range(0, $count)
-      ->execute();
-  return $tids;
-}
 
 
 

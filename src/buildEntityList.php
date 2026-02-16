@@ -39,12 +39,6 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
    */
   public function build_entity_list($type,$count,$tags,$nid)
   {
-    if ($type == 'academic_interests'){
-        $entity_list = as_entity_list_get_terms($type,$count);
-      }
-    if ($type == 'research_areas'){
-        $entity_list = as_entity_list_get_terms($type,$count);
-      }
     //article nids filtered by tags
     if ($type == 'article'){
         $entity_list = as_entity_list_get_articles($count,$tags);
@@ -83,11 +77,11 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
     if ($type == 'mmg_as'){
         $entity_list = as_entity_list_get_terms_as($type,$count,$tags);
       }
-    if ($type == 'work'){
-        $entity_list = as_entity_list_get_works($count,$tags);
+    if ($type == 'academic_interests'){
+        $entity_list = as_entity_list_get_terms($type,$count);
       }
-    if ($type == 'cinevent'){
-        $entity_list = as_entity_list_get_cinevents($count,$tags);
+    if ($type == 'research_areas'){
+        $entity_list = as_entity_list_get_terms($type,$count);
       }
     return $entity_list;
   }
