@@ -72,10 +72,10 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
         $entity_list = as_entity_list_get_people_research($count,$tags);
       }
     if ($type == 'dpc_as'){
-        $entity_list = as_entity_list_get_terms_as($type,$count,$tags);
+        $entity_list = as_entity_list_get_terms_filtered($type,$count,$tags);
       }
     if ($type == 'mmg_as'){
-        $entity_list = as_entity_list_get_terms_as($type,$count,$tags);
+        $entity_list = as_entity_list_get_terms_filtered($type,$count,$tags);
       }
     if ($type == 'academic_interests'){
         $entity_list = as_entity_list_get_terms($type,$count);

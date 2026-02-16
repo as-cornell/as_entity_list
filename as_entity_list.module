@@ -192,8 +192,7 @@ function as_entity_list_get_articles_department($count,$tags)
 
 function as_entity_list_get_terms($type,$count)
 {
-    //use entity query to look up tids
-      
+    //use entity query to look up all tids in a given vocabulary
     $tids = \Drupal::entityQuery('taxonomy_term')
       ->accessCheck(TRUE)
       ->condition('vid', $type)
@@ -208,7 +207,7 @@ function as_entity_list_get_terms($type,$count)
 
 
 
-function as_entity_list_get_terms_as($type,$count,$tags)
+function as_entity_list_get_terms_filtered($type,$count,$tags)
 {
  //use entity query to look up a specific number taxonomy term tids filtered by term references, only used in department_program_center_list and major_minor_gradfield_list paragraph types
   if ($type == 'dpc_as'){
