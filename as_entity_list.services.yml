@@ -1,8 +1,32 @@
 services:
+  # Logger channel
+  logger.channel.as_entity_list:
+    parent: logger.channel_base
+    arguments: ['as_entity_list']
+
+  # Query services
+  as_entity_list.article_query:
+    class: Drupal\as_entity_list\Service\ArticleQueryService
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+
+  as_entity_list.person_query:
+    class: Drupal\as_entity_list\Service\PersonQueryService
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+
+  as_entity_list.term_query:
+    class: Drupal\as_entity_list\Service\TermQueryService
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+
+  # Twig extensions
   as_entity_list.buildEntityList:
     class: Drupal\as_entity_list\buildEntityList
+    arguments:
+      - '@as_entity_list.article_query'
+      - '@as_entity_list.person_query'
+      - '@as_entity_list.term_query'
     tags:
       - { name: twig.extension }
+
   as_entity_list.checkTid:
     autowire: true
     class: Drupal\as_entity_list\checkTid
