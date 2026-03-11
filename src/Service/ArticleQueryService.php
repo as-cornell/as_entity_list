@@ -281,7 +281,7 @@ class ArticleQueryService {
       ->condition('type', 'article')
       ->condition('status', 1)
       // Only if related departments contains tid.
-      ->condition('field_department_program.entity', $tags)
+      ->condition('field_departments_programs.entity', $tags)
       ->sort('created', 'DESC')
       ->range(0, $count);
 
