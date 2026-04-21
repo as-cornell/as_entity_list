@@ -140,16 +140,6 @@ class ArticleQueryService {
               ->condition('field_department_program.entity', $term['tid']));
           }
         }
-        if ($term['vid'] == 'function') {
-          if ($operator == 'and') {
-            $query->condition($query->andConditionGroup()
-              ->condition('field_related_functions.entity', $term['tid']));
-          }
-          if ($operator == 'or') {
-            $query->condition($query->orConditionGroup()
-              ->condition('field_related_functions.entity', $term['tid']));
-          }
-        }
         if ($term['vid'] == 'article_bylines') {
           if ($operator == 'and') {
             $query->condition($query->andConditionGroup()
@@ -237,31 +227,6 @@ class ArticleQueryService {
     return $nids;
   }
 
-  /**
-   * Gets articles related to a specific person (field_related_people_nodes).
-   *
-   * @param int $count
-   *   Number of articles to retrieve.
-   * @param int $nid
-   *   Person node ID to filter by.
-   *
-   * @return array
-   *   Array of article node IDs.
-   */
-  public function getArticlesPersonAs($count, $nid) {
-    // Use entity query to look up article nids with related people containing current nid.
-    $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
-      ->condition('type', 'article')
-      ->condition('status', 1)
-      // Only if related people node contains nid.
-      ->condition('field_related_people_nodes.entity', $nid)
-      ->sort('created', 'DESC')
-      ->range(0, $count);
-
-    $nids = $query->execute();
-    return $nids;
-  }
 
   /**
    * Gets articles filtered by department/program term.

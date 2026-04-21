@@ -113,9 +113,6 @@ class buildEntityList extends \Twig\Extension\AbstractExtension
     if ($type == 'article_person') {
       $entity_list = $this->articleQuery->getArticlesPerson($count, $nid);
     }
-    if ($type == 'article_person_as') {
-      $entity_list = $this->articleQuery->getArticlesPersonAs($count, $nid);
-    }
     if ($type == 'article_department') {
       $entity_list = $this->articleQuery->getArticlesDepartment($count, $tags);
     }
