@@ -52,7 +52,6 @@ Extends Twig with the `build_entity_list()` function for use in templates:
 - `article_as` - Articles with advanced filtering
 - `article_footer` - Articles for footer (excludes current)
 - `article_person` - Articles by person (field_related_people)
-- `article_person_as` - Articles by person (field_related_people_nodes)
 - `article_department` - Articles by department/program
 - `person` - People alphabetically
 - `person_department` - People by department

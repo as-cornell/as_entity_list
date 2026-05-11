@@ -60,7 +60,7 @@ class ArticleQueryService {
       ->range(0, $count);
 
     if (isset($tags) && $tags != NULL) {
-      $query->condition('field_article_view_tags.entity', $tags);
+      $query->condition('field_tags.entity', $tags);
     }
 
     $nids = $query->execute();
@@ -118,16 +118,6 @@ class ArticleQueryService {
           if ($operator == 'or') {
             $query->condition($query->orConditionGroup()
               ->condition('field_tags.entity', $term['tid']));
-          }
-        }
-        if ($term['vid'] == 'article_view_tags') {
-          if ($operator == 'and') {
-            $query->condition($query->andConditionGroup()
-              ->condition('field_article_view_tags.entity', $term['tid']));
-          }
-          if ($operator == 'or') {
-            $query->condition($query->orConditionGroup()
-              ->condition('field_article_view_tags.entity', $term['tid']));
           }
         }
         if ($term['vid'] == 'departments_programs') {
