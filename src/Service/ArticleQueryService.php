@@ -3,6 +3,7 @@
 namespace Drupal\as_entity_list\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\domain\DomainNegotiatorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,16 +28,39 @@ class ArticleQueryService {
   protected $logger;
 
   /**
+   * The domain negotiator, or NULL when the Domain module is not installed.
+   *
+   * @var \Drupal\domain\DomainNegotiatorInterface|null
+   */
+  protected $domainNegotiator;
+
+  /**
    * Constructs an ArticleQueryService object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger service.
+   * @param \Drupal\domain\DomainNegotiatorInterface|null $domain_negotiator
+   *   The domain negotiator, injected only when the Domain module is present.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ?DomainNegotiatorInterface $domain_negotiator = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
+    $this->domainNegotiator = $domain_negotiator;
+  }
+
+  /**
+   * Returns TRUE when the active domain is departments_as_cornell_edu.
+   *
+   * Always FALSE when the Domain module is not installed.
+   */
+  private function isOnDepartmentsDomain(): bool {
+    if (!$this->domainNegotiator) {
+      return FALSE;
+    }
+    $domain = $this->domainNegotiator->getActiveDomain();
+    return $domain && $domain->id() === 'departments_as_cornell_edu';
   }
 
   /**
@@ -51,9 +75,10 @@ class ArticleQueryService {
    *   Array of article node IDs.
    */
   public function getArticles($count, $tags) {
-    // Use entity query to look up article nids filtered by tags.
+    $on_dept = $this->isOnDepartmentsDomain();
+
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(!$on_dept)
       ->condition('type', 'article')
       ->condition('status', 1)
       ->sort('created', 'DESC')
@@ -61,6 +86,11 @@ class ArticleQueryService {
 
     if (isset($tags) && $tags != NULL) {
       $query->condition('field_tags.entity', $tags);
+    }
+
+    // On the departments domain show only articles from other domains.
+    if ($on_dept) {
+      $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
     }
 
     $nids = $query->execute();
@@ -82,6 +112,7 @@ class ArticleQueryService {
     // Use entity query to look up a specific number article nids filtered by term references.
     $operator = 'and';
     $sort = 'latest';
+    $on_dept = $this->isOnDepartmentsDomain();
 
     if (isset($tags) && $tags != NULL) {
       $termvariables = $tags[0]['termvariables'];
@@ -90,7 +121,7 @@ class ArticleQueryService {
     }
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(!$on_dept)
       ->condition('type', 'article')
       ->condition('status', 1);
 
@@ -151,6 +182,11 @@ class ArticleQueryService {
           }
         }
       }
+    }
+
+    // On the departments domain show only articles from other domains.
+    if ($on_dept) {
+      $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
     }
 
     $nids = $query->execute();

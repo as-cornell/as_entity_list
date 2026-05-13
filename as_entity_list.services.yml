@@ -7,7 +7,7 @@ services:
   # Query services
   as_entity_list.article_query:
     class: Drupal\as_entity_list\Service\ArticleQueryService
-    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list', '@?domain.negotiator']
 
   as_entity_list.person_query:
     class: Drupal\as_entity_list\Service\PersonQueryService
