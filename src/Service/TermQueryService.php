@@ -3,6 +3,7 @@
 namespace Drupal\as_entity_list\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\domain\DomainNegotiatorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,16 +28,39 @@ class TermQueryService {
   protected $logger;
 
   /**
+   * The domain negotiator, or NULL when the Domain module is not installed.
+   *
+   * @var \Drupal\domain\DomainNegotiatorInterface|null
+   */
+  protected $domainNegotiator;
+
+  /**
    * Constructs a TermQueryService object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger service.
+   * @param \Drupal\domain\DomainNegotiatorInterface|null $domain_negotiator
+   *   The domain negotiator, injected only when the Domain module is present.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ?DomainNegotiatorInterface $domain_negotiator = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
+    $this->domainNegotiator = $domain_negotiator;
+  }
+
+  /**
+   * Returns TRUE when the active domain is departments_as_cornell_edu.
+   *
+   * Always FALSE when the Domain module is not installed.
+   */
+  private function isOnDepartmentsDomain(): bool {
+    if (!$this->domainNegotiator) {
+      return FALSE;
+    }
+    $domain = $this->domainNegotiator->getActiveDomain();
+    return $domain && $domain->id() === 'departments_as_cornell_edu';
   }
 
   /**
@@ -51,17 +75,24 @@ class TermQueryService {
    *   Array of taxonomy term IDs.
    */
   public function getTerms($type, $count) {
-    // Use entity query to look up all tids in a given vocabulary.
-    $tids = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery()
-      ->accessCheck(TRUE)
+    $on_dept = $this->isOnDepartmentsDomain();
+
+    $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery()
+      ->accessCheck(!$on_dept)
       ->condition('vid', $type)
       ->condition('status', 1)
       // Exclude parent terms like department names.
       ->condition('parent', '0', '<>')
-      ->range(0, $count)
-      ->execute();
+      ->range(0, $count);
 
-    return $tids;
+    // On the departments domain show only terms from other domains.
+    // Only applied to vocabularies that have the domain_access field
+    // (research_areas, academic_interests); dpc_as and mmg_as do not.
+    if ($on_dept) {
+      $query->condition('domain_access', 'departments_as_cornell_edu', '<>');
+    }
+
+    return $query->execute();
   }
 
   /**

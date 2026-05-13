@@ -15,7 +15,7 @@ services:
 
   as_entity_list.term_query:
     class: Drupal\as_entity_list\Service\TermQueryService
-    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list', '@?domain.negotiator']
 
   # Twig extensions
   as_entity_list.buildEntityList:
