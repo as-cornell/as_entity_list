@@ -11,7 +11,7 @@ services:
 
   as_entity_list.person_query:
     class: Drupal\as_entity_list\Service\PersonQueryService
-    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list']
+    arguments: ['@entity_type.manager', '@logger.channel.as_entity_list', '@?domain.negotiator']
 
   as_entity_list.term_query:
     class: Drupal\as_entity_list\Service\TermQueryService

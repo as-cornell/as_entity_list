@@ -3,6 +3,7 @@
 namespace Drupal\as_entity_list\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\domain\DomainNegotiatorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,16 +28,39 @@ class PersonQueryService {
   protected $logger;
 
   /**
+   * The domain negotiator, or NULL when the Domain module is not installed.
+   *
+   * @var \Drupal\domain\DomainNegotiatorInterface|null
+   */
+  protected $domainNegotiator;
+
+  /**
    * Constructs a PersonQueryService object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger service.
+   * @param \Drupal\domain\DomainNegotiatorInterface|null $domain_negotiator
+   *   The domain negotiator, injected only when the Domain module is present.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ?DomainNegotiatorInterface $domain_negotiator = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
+    $this->domainNegotiator = $domain_negotiator;
+  }
+
+  /**
+   * Returns TRUE when the active domain is departments_as_cornell_edu.
+   *
+   * Always FALSE when the Domain module is not installed.
+   */
+  private function isOnDepartmentsDomain(): bool {
+    if (!$this->domainNegotiator) {
+      return FALSE;
+    }
+    $domain = $this->domainNegotiator->getActiveDomain();
+    return $domain && $domain->id() === 'departments_as_cornell_edu';
   }
 
   /**
@@ -51,13 +75,18 @@ class PersonQueryService {
    *   Array of person node IDs.
    */
   public function getPeople($count, $tags) {
-    // Use entity query to look up people nids.
+    $on_dept = $this->isOnDepartmentsDomain();
+
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(!$on_dept)
       ->condition('type', 'person')
       ->condition('status', 1)
       ->range(0, $count)
       ->sort('field_person_last_name', 'ASC');
+
+    if ($on_dept) {
+      $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
 
     $nids = $query->execute();
     return $nids;
@@ -78,6 +107,7 @@ class PersonQueryService {
     // Use entity query to look up people nids filtered by department/program.
     $operator = 'and';
     $sort = 'alphabetical';
+    $on_dept = $this->isOnDepartmentsDomain();
 
     if (isset($tags) && $tags != NULL) {
       $termvariables = $tags[0]['termvariables'];
@@ -86,7 +116,7 @@ class PersonQueryService {
     }
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(!$on_dept)
       ->condition('type', 'person')
       ->condition('status', 1);
 
@@ -113,6 +143,11 @@ class PersonQueryService {
       }
     }
 
+    // On the departments domain show only people from other domains.
+    if ($on_dept) {
+      $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+
     $nids = $query->execute();
 
     if ($sort == 'random') {
@@ -137,14 +172,19 @@ class PersonQueryService {
    *   Array of person node IDs.
    */
   public function getPeopleResearch($count, $tags) {
-    // Use entity query to look up people nids filtered by research area.
+    $on_dept = $this->isOnDepartmentsDomain();
+
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(!$on_dept)
       ->condition('type', 'person')
       ->condition('status', 1)
       ->condition('field_research_areas.entity', $tags)
       ->range(0, $count)
       ->sort('field_person_last_name', 'ASC');
+
+    if ($on_dept) {
+      $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
 
     $nids = $query->execute();
     return $nids;
