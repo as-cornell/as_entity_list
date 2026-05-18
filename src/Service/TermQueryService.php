@@ -3,7 +3,7 @@
 namespace Drupal\as_entity_list\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\domain\DomainNegotiatorInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,7 +32,14 @@ class TermQueryService {
    *
    * @var \Drupal\domain\DomainNegotiatorInterface|null
    */
-  protected $domainNegotiator;
+  protected mixed $domainNegotiator;
+
+  /**
+   * The route match service.
+   *
+   * @var \Drupal\Core\Routing\RouteMatchInterface|null
+   */
+  protected $routeMatch;
 
   /**
    * Constructs a TermQueryService object.
@@ -43,11 +50,14 @@ class TermQueryService {
    *   The logger service.
    * @param \Drupal\domain\DomainNegotiatorInterface|null $domain_negotiator
    *   The domain negotiator, injected only when the Domain module is present.
+   * @param \Drupal\Core\Routing\RouteMatchInterface|null $route_match
+   *   The route match service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, ?DomainNegotiatorInterface $domain_negotiator = NULL) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, mixed $domain_negotiator = NULL, ?RouteMatchInterface $route_match = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
     $this->domainNegotiator = $domain_negotiator;
+    $this->routeMatch = $route_match;
   }
 
   /**
@@ -59,6 +69,25 @@ class TermQueryService {
     }
     $domain = $this->domainNegotiator->getActiveDomain();
     return $domain ? $domain->id() : NULL;
+  }
+
+  /**
+   * Returns the first non-departments domain from the current route's node.
+   */
+  private function getCurrentNodeDomainId(): ?string {
+    if (!$this->routeMatch) {
+      return NULL;
+    }
+    $node = $this->routeMatch->getParameter('node');
+    if (!$node || !$node->hasField('field_domain_access')) {
+      return NULL;
+    }
+    foreach (array_column($node->get('field_domain_access')->getValue(), 'target_id') as $domain) {
+      if ($domain !== 'departments_as_cornell_edu') {
+        return $domain;
+      }
+    }
+    return NULL;
   }
 
   /**
@@ -86,7 +115,8 @@ class TermQueryService {
     // Only applied to vocabularies that have domain_access
     // (research_areas, academic_interests); dpc_as and mmg_as do not.
     if ($domain === 'departments_as_cornell_edu') {
-      $query->condition('domain_access', 'departments_as_cornell_edu', '<>');
+      $page_domain = $this->getCurrentNodeDomainId();
+      $query->condition('domain_access', $page_domain ?? 'departments_as_cornell_edu', $page_domain ? '=' : '<>');
     }
     elseif ($domain) {
       $query->condition('domain_access', $domain);
