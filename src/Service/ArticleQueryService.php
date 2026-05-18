@@ -51,16 +51,14 @@ class ArticleQueryService {
   }
 
   /**
-   * Returns TRUE when the active domain is departments_as_cornell_edu.
-   *
-   * Always FALSE when the Domain module is not installed.
+   * Returns the active domain ID, or NULL when unavailable.
    */
-  private function isOnDepartmentsDomain(): bool {
+  private function getActiveDomainId(): ?string {
     if (!$this->domainNegotiator) {
-      return FALSE;
+      return NULL;
     }
     $domain = $this->domainNegotiator->getActiveDomain();
-    return $domain && $domain->id() === 'departments_as_cornell_edu';
+    return $domain ? $domain->id() : NULL;
   }
 
   /**
@@ -75,10 +73,10 @@ class ArticleQueryService {
    *   Array of article node IDs.
    */
   public function getArticles($count, $tags) {
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('type', 'article')
       ->condition('status', 1)
       ->sort('created', 'DESC')
@@ -88,9 +86,13 @@ class ArticleQueryService {
       $query->condition('field_tags.entity', $tags);
     }
 
-    // On the departments domain show only articles from other domains.
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
+      // Show articles from all department-specific domains.
       $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      // Show only articles tagged for this specific domain.
+      $query->condition('field_domain_access', $domain);
     }
 
     $nids = $query->execute();
@@ -112,7 +114,7 @@ class ArticleQueryService {
     // Use entity query to look up a specific number article nids filtered by term references.
     $operator = 'and';
     $sort = 'latest';
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     if (isset($tags) && $tags != NULL) {
       $termvariables = $tags[0]['termvariables'];
@@ -121,7 +123,7 @@ class ArticleQueryService {
     }
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('type', 'article')
       ->condition('status', 1);
 
@@ -184,9 +186,13 @@ class ArticleQueryService {
       }
     }
 
-    // On the departments domain show only articles from other domains.
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
+      // Show articles from all department-specific domains.
       $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      // Show only articles tagged for this specific domain.
+      $query->condition('field_domain_access', $domain);
     }
 
     $nids = $query->execute();

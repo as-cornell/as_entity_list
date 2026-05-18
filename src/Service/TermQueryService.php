@@ -51,16 +51,14 @@ class TermQueryService {
   }
 
   /**
-   * Returns TRUE when the active domain is departments_as_cornell_edu.
-   *
-   * Always FALSE when the Domain module is not installed.
+   * Returns the active domain ID, or NULL when unavailable.
    */
-  private function isOnDepartmentsDomain(): bool {
+  private function getActiveDomainId(): ?string {
     if (!$this->domainNegotiator) {
-      return FALSE;
+      return NULL;
     }
     $domain = $this->domainNegotiator->getActiveDomain();
-    return $domain && $domain->id() === 'departments_as_cornell_edu';
+    return $domain ? $domain->id() : NULL;
   }
 
   /**
@@ -75,21 +73,23 @@ class TermQueryService {
    *   Array of taxonomy term IDs.
    */
   public function getTerms($type, $count) {
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     $query = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('vid', $type)
       ->condition('status', 1)
       // Exclude parent terms like department names.
       ->condition('parent', '0', '<>')
       ->range(0, $count);
 
-    // On the departments domain show only terms from other domains.
-    // Only applied to vocabularies that have the domain_access field
+    // Only applied to vocabularies that have domain_access
     // (research_areas, academic_interests); dpc_as and mmg_as do not.
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
       $query->condition('domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      $query->condition('domain_access', $domain);
     }
 
     return $query->execute();

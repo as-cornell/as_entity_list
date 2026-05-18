@@ -51,16 +51,14 @@ class PersonQueryService {
   }
 
   /**
-   * Returns TRUE when the active domain is departments_as_cornell_edu.
-   *
-   * Always FALSE when the Domain module is not installed.
+   * Returns the active domain ID, or NULL when unavailable.
    */
-  private function isOnDepartmentsDomain(): bool {
+  private function getActiveDomainId(): ?string {
     if (!$this->domainNegotiator) {
-      return FALSE;
+      return NULL;
     }
     $domain = $this->domainNegotiator->getActiveDomain();
-    return $domain && $domain->id() === 'departments_as_cornell_edu';
+    return $domain ? $domain->id() : NULL;
   }
 
   /**
@@ -75,17 +73,20 @@ class PersonQueryService {
    *   Array of person node IDs.
    */
   public function getPeople($count, $tags) {
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('type', 'person')
       ->condition('status', 1)
       ->range(0, $count)
       ->sort('field_person_last_name', 'ASC');
 
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
       $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      $query->condition('field_domain_access', $domain);
     }
 
     $nids = $query->execute();
@@ -107,7 +108,7 @@ class PersonQueryService {
     // Use entity query to look up people nids filtered by department/program.
     $operator = 'and';
     $sort = 'alphabetical';
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     if (isset($tags) && $tags != NULL) {
       $termvariables = $tags[0]['termvariables'];
@@ -116,7 +117,7 @@ class PersonQueryService {
     }
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('type', 'person')
       ->condition('status', 1);
 
@@ -143,9 +144,11 @@ class PersonQueryService {
       }
     }
 
-    // On the departments domain show only people from other domains.
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
       $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      $query->condition('field_domain_access', $domain);
     }
 
     $nids = $query->execute();
@@ -172,18 +175,21 @@ class PersonQueryService {
    *   Array of person node IDs.
    */
   public function getPeopleResearch($count, $tags) {
-    $on_dept = $this->isOnDepartmentsDomain();
+    $domain = $this->getActiveDomainId();
 
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->accessCheck(!$on_dept)
+      ->accessCheck(FALSE)
       ->condition('type', 'person')
       ->condition('status', 1)
       ->condition('field_research_areas.entity', $tags)
       ->range(0, $count)
       ->sort('field_person_last_name', 'ASC');
 
-    if ($on_dept) {
+    if ($domain === 'departments_as_cornell_edu') {
       $query->condition('field_domain_access', 'departments_as_cornell_edu', '<>');
+    }
+    elseif ($domain) {
+      $query->condition('field_domain_access', $domain);
     }
 
     $nids = $query->execute();
