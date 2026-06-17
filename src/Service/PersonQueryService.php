@@ -206,6 +206,11 @@ class PersonQueryService {
       }
     }
 
+    // Optional field_person_type filter — pass label strings, e.g. ['Faculty', 'Other Faculty'].
+    if (!empty($tags[0]['person_types'])) {
+      $query->condition('field_person_type.entity:taxonomy_term.name', (array) $tags[0]['person_types'], 'IN');
+    }
+
     if ($domain === 'departments_as_cornell_edu') {
       $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
       $query->condition('field_domain_access', $page_domain ?? 'departments_as_cornell_edu', $page_domain ? '=' : '<>');
