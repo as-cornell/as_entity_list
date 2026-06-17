@@ -91,6 +91,38 @@ class PersonQueryService {
   }
 
   /**
+   * Returns the domain from the current route's taxonomy term.
+   *
+   * Used when building entity lists from a taxonomy term page, where there is
+   * no node route parameter to derive the department domain from.
+   */
+  private function getCurrentTermDomainId(): ?string {
+    if (!$this->routeMatch) {
+      return NULL;
+    }
+    $term = $this->routeMatch->getParameter('taxonomy_term');
+    if (!$term) {
+      return NULL;
+    }
+    // departments_programs terms store their domain in field_domain_access_target_id.
+    if ($term->hasField('field_domain_access_target_id')) {
+      $domain = $term->get('field_domain_access_target_id')->value;
+      if (!empty($domain)) {
+        return $domain;
+      }
+    }
+    // Fallback: check field_domain_access on the term itself.
+    if ($term->hasField('field_domain_access')) {
+      foreach (array_column($term->get('field_domain_access')->getValue(), 'target_id') as $domain) {
+        if ($domain !== 'departments_as_cornell_edu') {
+          return $domain;
+        }
+      }
+    }
+    return NULL;
+  }
+
+  /**
    * Gets people sorted alphabetically by last name.
    *
    * @param int $count
@@ -112,7 +144,7 @@ class PersonQueryService {
       ->sort('field_person_last_name', 'ASC');
 
     if ($domain === 'departments_as_cornell_edu') {
-      $page_domain = $this->getCurrentNodeDomainId();
+      $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
       $query->condition('field_domain_access', $page_domain ?? 'departments_as_cornell_edu', $page_domain ? '=' : '<>');
     }
     elseif ($domain) {
@@ -175,7 +207,7 @@ class PersonQueryService {
     }
 
     if ($domain === 'departments_as_cornell_edu') {
-      $page_domain = $this->getCurrentNodeDomainId();
+      $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
       $query->condition('field_domain_access', $page_domain ?? 'departments_as_cornell_edu', $page_domain ? '=' : '<>');
     }
     elseif ($domain) {
@@ -217,7 +249,7 @@ class PersonQueryService {
       ->sort('field_person_last_name', 'ASC');
 
     if ($domain === 'departments_as_cornell_edu') {
-      $page_domain = $this->getCurrentNodeDomainId();
+      $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
       $query->condition('field_domain_access', $page_domain ?? 'departments_as_cornell_edu', $page_domain ? '=' : '<>');
     }
     elseif ($domain) {
