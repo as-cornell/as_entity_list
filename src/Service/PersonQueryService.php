@@ -206,9 +206,21 @@ class PersonQueryService {
       }
     }
 
-    // Optional field_person_type filter — pass label strings, e.g. ['Faculty', 'Other Faculty'].
+    // Optional field_person_type filter. Takes person type keys
+    // (field_person_type_key, e.g. ['faculty', 'other_faculty']) or, as
+    // before, term names (['Faculty']), so a type can be renamed without
+    // breaking the list once templates pass keys (as-cornell/backlog#12).
     if (!empty($tags[0]['person_types'])) {
-      $query->condition('field_person_type.entity:taxonomy_term.name', (array) $tags[0]['person_types'], 'IN');
+      $types = (array) $tags[0]['person_types'];
+      if ($this->entityTypeManager->getStorage('field_storage_config')->load('taxonomy_term.field_person_type_key')) {
+        $query->condition($query->orConditionGroup()
+          ->condition('field_person_type.entity:taxonomy_term.name', $types, 'IN')
+          ->condition('field_person_type.entity:taxonomy_term.field_person_type_key', $types, 'IN'));
+      }
+      else {
+        // No keys on this site yet: names only, exactly as before.
+        $query->condition('field_person_type.entity:taxonomy_term.name', $types, 'IN');
+      }
     }
 
     if ($domain === 'departments_as_cornell_edu') {

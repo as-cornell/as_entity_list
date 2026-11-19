@@ -61,6 +61,15 @@ Extends Twig with the `build_entity_list()` function for use in templates:
 - `academic_interests` - Academic interest terms
 - `research_areas` - Research area terms
 
+### Person type filter
+
+`person_department` takes an optional `person_types` list. Pass person type
+keys (`field_person_type_key` on the person type terms: `faculty`,
+`other_faculty`, `emeritus`, `graduate_student`, `department_staff`,
+`college_staff`), so the list keeps working when a type is renamed
+(as-cornell/backlog#12). Term names (`['Faculty']`) still match, as before;
+on a site with no key field yet only names match.
+
 ### Usage Example
 
 ```twig
@@ -70,6 +79,9 @@ Extends Twig with the `build_entity_list()` function for use in templates:
 {# Get 10 people from a specific department #}
 {% set department_tags = [{'termvariables': [...], 'operator': 'and', 'sort': 'alphabetical'}] %}
 {% set people = build_entity_list('person_department', 10, department_tags, null) %}
+
+{# Only faculty from that department: pass person type keys #}
+{% set department_tags = [{'termvariables': [...], 'operator': 'and', 'sort': 'alphabetical', 'person_types': ['faculty']}] %}
 
 {# Get related articles for footer (exclude current article) #}
 {% set related = build_entity_list('article_footer', 3, null, node.id) %}
