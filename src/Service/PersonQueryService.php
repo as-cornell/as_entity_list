@@ -141,7 +141,12 @@ class PersonQueryService {
       ->condition('type', 'person')
       ->condition('status', 1)
       ->range(0, $count)
-      ->sort('field_person_last_name', 'ASC');
+      ->sort('field_person_last_name', 'ASC')
+      // Ties on last name are broken by full name (first name first), then
+      // node ID, so people sharing a last name keep a stable order
+      // (as-cornell/as_entity_list#2).
+      ->sort('title', 'ASC')
+      ->sort('nid', 'ASC');
 
     if ($domain === 'departments_as_cornell_edu') {
       $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
@@ -185,6 +190,8 @@ class PersonQueryService {
 
     if ($sort == 'alphabetical') {
       $query->sort('field_person_last_name', 'ASC');
+      $query->sort('title', 'ASC');
+      $query->sort('nid', 'ASC');
       $query->range(0, $count);
     }
     if ($sort == 'random') {
@@ -263,7 +270,12 @@ class PersonQueryService {
       ->condition('status', 1)
       ->condition('field_research_areas.entity', $tags)
       ->range(0, $count)
-      ->sort('field_person_last_name', 'ASC');
+      ->sort('field_person_last_name', 'ASC')
+      // Ties on last name are broken by full name (first name first), then
+      // node ID, so people sharing a last name keep a stable order
+      // (as-cornell/as_entity_list#2).
+      ->sort('title', 'ASC')
+      ->sort('nid', 'ASC');
 
     if ($domain === 'departments_as_cornell_edu') {
       $page_domain = $this->getCurrentNodeDomainId() ?? $this->getCurrentTermDomainId();
